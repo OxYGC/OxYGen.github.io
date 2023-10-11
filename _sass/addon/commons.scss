@@ -73,11 +73,52 @@ img {
   height: auto;
   transition: all 0.35s ease-in-out;
 
-  .blur & {
-    $blur: 20px;
+  &[data-src] {
+    &[data-lqip='true'] {
+      &.lazyload,
+      &.lazyloading {
+        -webkit-filter: blur(20px);
+        filter: blur(20px);
+      }
+    }
 
-    -webkit-filter: blur($blur);
-    filter: blur($blur);
+    &:not([data-lqip='true']) {
+      &.lazyload,
+      &.lazyloading {
+        background: var(--img-bg);
+      }
+
+      &.lazyloaded {
+        -webkit-animation: fade-in 0.35s ease-in;
+        animation: fade-in 0.35s ease-in;
+      }
+    }
+
+    &.shadow {
+      -webkit-filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.08));
+      filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.08));
+      box-shadow: none !important; /* cover the Bootstrap 4.6.1 styles */
+    }
+
+    @extend %img-caption;
+  }
+
+  @-webkit-keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 }
 
@@ -132,11 +173,12 @@ kbd {
 }
 
 footer {
+  font-size: 0.8rem;
   background-color: var(--main-bg);
   height: $footer-height;
   border-top: 1px solid var(--main-border-color);
 
-  @extend %text-xs;
+  @extend %text-color;
 
   a {
     @extend %text-highlight;
@@ -147,6 +189,7 @@ footer {
   }
 
   p {
+    line-height: 1.75;
     text-align: center;
     margin-bottom: 0;
   }
@@ -230,8 +273,6 @@ i {
       margin-bottom: 0.3rem;
     }
 
-    @extend %sup-fn-target;
-
     > p {
       margin-left: 0.25em;
       margin-top: 0;
@@ -246,11 +287,8 @@ i {
     @include pl-pr(2px);
 
     border-bottom-style: none !important;
+    transition: background-color 1.5s ease-in-out;
   }
-}
-
-sup {
-  @extend %sup-fn-target;
 }
 
 .reversefootnote {
@@ -306,27 +344,6 @@ sup {
 
 /* --- post --- */
 
-.preview-img {
-  aspect-ratio: 40 / 21;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-
-  @extend %rounded;
-
-  &:not(.no-bg) {
-    background: var(--img-bg);
-  }
-
-  img {
-    height: 100%;
-    -o-object-fit: cover;
-    object-fit: cover;
-
-    @extend %rounded;
-  }
-}
-
 .post-preview {
   @extend %rounded;
 
@@ -355,6 +372,7 @@ sup {
 
 main {
   line-height: 1.75;
+  min-height: calc(100vh - $topbar-height - $footer-height);
 
   h1 {
     margin-top: 2rem;
@@ -362,6 +380,7 @@ main {
   }
 
   p {
+    > img[data-src],
     > a.popup {
       &:not(.normal):not(.left):not(.right) {
         @include align-center;
@@ -379,7 +398,7 @@ main {
 }
 
 .post-meta {
-  @extend %text-sm;
+  font-size: 0.85rem;
 
   a {
     &:not([class]):hover {
@@ -515,15 +534,14 @@ main {
     background: var(--shimmer-bg);
     height: 100%;
     width: 100%;
-    -webkit-animation: shimmer 1.3s infinite;
-    animation: shimmer 1.3s infinite;
+    -webkit-animation: shimmer 1s infinite;
+    animation: shimmer 1s infinite;
   }
 
   @-webkit-keyframes shimmer {
     0% {
       transform: translateX(-100%);
     }
-
     100% {
       transform: translateX(100%);
     }
@@ -533,7 +551,6 @@ main {
     0% {
       transform: translateX(-100%);
     }
-
     100% {
       transform: translateX(100%);
     }
@@ -672,6 +689,7 @@ mjx-container {
 /* --- sidebar layout --- */
 
 $sidebar-display: 'sidebar-display';
+$btn-gap: 0.8rem; // for the bottom icons
 $btn-border-width: 3px;
 $btn-mb: 0.5rem;
 
@@ -816,11 +834,9 @@ $btn-mb: 0.5rem;
     padding-right: 1rem;
     margin-bottom: 1.5rem;
 
-    $btn-size: 1.75rem;
-
     %button {
-      width: $btn-size;
-      height: $btn-size;
+      width: 1.75rem;
+      height: 1.75rem;
       margin-bottom: $btn-mb; // multi line gap
       border-radius: 50%;
       color: var(--sidebar-btn-color);
@@ -842,12 +858,12 @@ $btn-mb: 0.5rem;
       @extend %clickable-transition;
 
       &:not(:last-child) {
-        margin-right: $sb-btn-gap;
+        margin-right: $btn-gap;
       }
     }
 
     i {
-      line-height: $btn-size;
+      line-height: 1.75rem;
     }
 
     .mode-toggle {
@@ -861,7 +877,7 @@ $btn-mb: 0.5rem;
 
     .icon-border {
       @extend %no-cursor;
-      @include ml-mr(calc(($sb-btn-gap - $btn-border-width) / 2));
+      @include ml-mr(calc(($btn-gap - $btn-border-width) / 2));
 
       background-color: var(--sidebar-btn-color);
       content: '';
@@ -1105,28 +1121,18 @@ search {
   }
 }
 
-/* --- basic wrappers --- */
+/* --- main wrapper --- */
 
 #main-wrapper {
   position: relative;
 
   @include pl-pr(0);
-
-  > .container {
-    min-height: 100vh;
-  }
 }
 
 #topbar-wrapper.row,
 #main-wrapper > .container > .row,
 #search-result-wrapper > .row {
   @include ml-mr(0);
-}
-
-#tail-wrapper {
-  > :not(script) {
-    margin-top: 3rem;
-  }
 }
 
 /* --- button back-to-top --- */
@@ -1264,6 +1270,10 @@ search {
     }
   }
 
+  main {
+    min-height: calc(100vh - $topbar-height - $footer-height-large);
+  }
+
   footer {
     @include slide;
 
@@ -1277,7 +1287,7 @@ search {
     }
 
     #main-wrapper {
-      transform: translateX($sidebar-width);
+      transform: translateX(#{$sidebar-width});
     }
 
     #back-to-top {
@@ -1288,8 +1298,8 @@ search {
   #sidebar {
     @include slide;
 
-    transform: translateX(-$sidebar-width); /* hide */
-    -webkit-transform: translateX(-$sidebar-width);
+    transform: translateX(-#{$sidebar-width}); /* hide */
+    -webkit-transform: translateX(-#{$sidebar-width});
   }
 
   #main-wrapper {
@@ -1464,7 +1474,7 @@ search {
 
 @media all and (min-width: 1400px) {
   #back-to-top {
-    right: calc((100vw - $sidebar-width - 1140px) / 2 + 3rem);
+    right: calc((100vw - #{$sidebar-width} - 1140px) / 2 + 3rem);
   }
 }
 
@@ -1481,7 +1491,7 @@ search {
 
   search {
     margin-right: calc(
-      $main-content-max-width / 4 - $search-max-width - 0.75rem
+      #{$main-content-max-width} * 0.25 - #{$search-max-width} - 0.75rem
     );
   }
 
@@ -1498,12 +1508,14 @@ search {
 
   #back-to-top {
     right: calc(
-      (100vw - $sidebar-width-large - $main-content-max-width) / 2 + 2rem
+      (100vw - #{$sidebar-width-large} - #{$main-content-max-width}) / 2 + 2rem
     );
   }
 
   #sidebar {
     width: $sidebar-width-large;
+
+    $icon-gap: 1rem; // for the bottom icons
 
     .profile-wrapper {
       margin-top: 3.5rem;
@@ -1522,11 +1534,11 @@ search {
       margin-bottom: 1.75rem;
 
       a:not(:last-child) {
-        margin-right: $sb-btn-gap-lg;
+        margin-right: $icon-gap;
       }
 
       .icon-border {
-        @include ml-mr(calc(($sb-btn-gap-lg - $btn-border-width) / 2));
+        @include ml-mr(calc(($icon-gap - $btn-border-width) / 2));
       }
     }
   }

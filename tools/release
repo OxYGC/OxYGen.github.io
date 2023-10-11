@@ -25,7 +25,6 @@ PROD_BRANCH="production"
 
 GEM_SPEC="jekyll-theme-chirpy.gemspec"
 NODE_CONFIG="package.json"
-CHANGE_LOG="docs/CHANGELOG.md"
 
 JS_DIST="assets/js/dist"
 BACKUP_PATH="$(mktemp -d)"
@@ -104,15 +103,15 @@ check() {
 # auto-generate a new version number to the file 'package.json' and
 bump_node() {
   if $opt_pre; then
-    standard-version -i "$CHANGE_LOG" -p rc
+    standard-version --prerelease rc
   else
-    standard-version -i "$CHANGE_LOG"
+    standard-version
   fi
 
   # Change heading of Patch version to heading level 2 (a bug from `standard-version`)
-  sed -i "s/^### \[/## \[/g" "$CHANGE_LOG"
+  sed -i "s/^### \[/## \[/g" CHANGELOG.md
   # Replace multiple empty lines with a single empty line
-  sed -i "/^$/N;/^\n$/D" "$CHANGE_LOG"
+  sed -i "/^$/N;/^\n$/D" CHANGELOG.md
 }
 
 ## Bump new version to gem config file
